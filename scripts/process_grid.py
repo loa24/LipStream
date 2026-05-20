@@ -93,3 +93,26 @@ def main():
 if __name__ == "__main__":
     main()
 
+def main():
+
+    sample_counter = 1
+
+    for speaker in sorted(os.listdir(RAW_GRID_DIR)):
+
+        speaker_dir = RAW_GRID_DIR / speaker
+
+        if not speaker_dir.is_dir():
+            continue
+
+        video_files = sorted([f for f in os.listdir(speaker_dir) if f.endswith(".mpg")])
+
+        for video_file in video_files:
+
+            sample_id = f"sample_{sample_counter:06d}"
+
+            process_one_sample(speaker_dir, video_file, sample_id)
+
+            sample_counter += 1
+
+if __name__ == "__main__":
+    main()
