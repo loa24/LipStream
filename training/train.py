@@ -202,7 +202,7 @@ def main():
     
     # Hyperparameters
     batch_size = 4
-    epochs = 3
+    epochs = 30
     lr = 1e-4
     num_classes = 55
     num_workers = 0 

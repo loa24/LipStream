@@ -9,8 +9,8 @@ vocab = set()
 sample_count = 0
 error_count = 0
 
-print("🔍 Building vocabulary from transcripts...")
-print(f"📁 Looking in: {DATA_DIR}\n")
+print("Building vocabulary from transcripts...")
+print(f"Looking in: {DATA_DIR}\n")
 
 # Iterate through all samples
 for sample in sorted(os.listdir(DATA_DIR)):
