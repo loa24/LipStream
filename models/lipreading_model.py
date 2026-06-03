@@ -27,7 +27,7 @@ class LipReadingModel(nn.Module):
         resnet = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
         self.feature_dim = 512
         
-        # Remove classification head (keep only feature extractor)
+        # Remove classification head 
         self.cnn = nn.Sequential(*list(resnet.children())[:-1])
         
         # Optionally freeze CNN weights
