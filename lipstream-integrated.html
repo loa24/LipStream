@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LipStream</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg:#eceaf6;--surface:#fff;--border:#e2dff0;--divider:#dbd8ee;
+      --text:#1a1728;--muted:#6e6b85;--faint:#b0adcc;--inv:#fff;
+      --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:#ede9fe;--primary-soft:#c4b5fd;
+      --success:#22c55e;
+      --xs:clamp(.75rem,.7rem + .25vw,.875rem);--sm:clamp(.875rem,.8rem + .35vw,1rem);
+      --base:clamp(1rem,.95rem + .25vw,1.125rem);--lg:clamp(1.125rem,1rem + .75vw,1.5rem);
+      --xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);
+      --r-sm:.375rem;--r-md:.625rem;--r-lg:.875rem;--r-xl:1.25rem;--r-full:9999px;
+      --sh-sm:0 1px 3px rgba(99,91,138,.08);--sh-md:0 4px 16px rgba(99,91,138,.12);
+      --tr:180ms cubic-bezier(.16,1,.3,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{-webkit-font-smoothing:antialiased}
+    body{font-family:'Inter',sans-serif;font-size:var(--sm);background:var(--bg);color:var(--text);min-height:100dvh}
+    button{cursor:pointer;border:none;background:none;font:inherit}
+    .nav{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--sh-sm)}
+    .logo{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:var(--base);color:var(--text);text-decoration:none}
+    .logo-icon{width:36px;height:36px;background:var(--primary-light);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center}
+    .nav-steps{display:flex;gap:.25rem}
+    .nav-btn{padding:.4rem 1rem;border-radius:var(--r-full);font-size:var(--sm);font-weight:500;color:var(--muted);transition:color var(--tr),background var(--tr)}
+    .nav-btn.active{background:var(--primary);color:#fff;font-weight:600}
+    .nav-btn:not(.active):hover{color:var(--primary)}
+    .page{display:none;min-height:calc(100dvh - 65px)}
+    .page.active{display:block}
+    .upload-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 1rem;min-height:calc(100dvh - 65px)}
+    .upload-h{display:flex;align-items:center;gap:.75rem;font-size:clamp(1.75rem,4vw,2.5rem);font-weight:800;margin-bottom:.75rem}
+    .upload-h-icon{width:52px;height:52px;background:var(--primary-light);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center}
+    .upload-sub{color:var(--muted);font-size:var(--base);margin-bottom:2.5rem;text-align:center}
+    .dropzone{width:100%;max-width:720px;border:2px dashed var(--primary-soft);border-radius:var(--r-xl);background:var(--surface);padding:4rem 2rem;display:flex;flex-direction:column;align-items:center;gap:1rem;cursor:pointer;transition:border-color var(--tr),background var(--tr);text-align:center}
+    .dropzone:hover,.dropzone.over{border-color:var(--primary);background:var(--primary-light)}
+    .dz-icon{width:68px;height:68px;background:var(--bg);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center}
+    .dz-icon svg{color:var(--primary);width:30px;height:30px}
+    .dz-label{font-size:var(--base);font-weight:600}
+    .dz-label span{color:var(--primary);text-decoration:underline}
+    .dz-meta{font-size:var(--xs);color:var(--muted)}
+    #fi{display:none}
+    .proc-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 1rem;min-height:calc(100dvh - 65px)}
+    .spin{width:64px;height:64px;background:var(--primary);border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;animation:spin 1.2s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spin svg{color:#fff;width:28px;height:28px}
+    .proc-title{font-size:var(--xl);font-weight:800;margin-bottom:.5rem}
+    .proc-sub{color:var(--muted);font-size:var(--sm);margin-bottom:2rem}
+    .pcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:1.5rem;width:100%;max-width:680px;margin-bottom:1rem;box-shadow:var(--sh-sm)}
+    .phdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+    .plbl{font-weight:700;font-size:var(--base)}
+    .ppct{font-weight:800;font-size:var(--lg);color:var(--primary)}
+    .pbar{width:100%;height:10px;background:var(--bg);border-radius:var(--r-full);overflow:hidden;margin-bottom:1rem}
+    .pfill{height:100%;background:var(--primary);border-radius:var(--r-full);transition:width .3s ease}
+    .pftr{display:flex;justify-content:space-between;font-size:var(--xs);color:var(--muted)}
+    .ptimer{display:flex;align-items:center;gap:.25rem}
+    .ptimer svg{width:14px;height:14px}
+    .scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);width:100%;max-width:680px;overflow:hidden;box-shadow:var(--sh-sm)}
+    .step{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;font-weight:600;font-size:var(--sm);color:var(--muted);border-bottom:1px solid var(--border)}
+    .step:last-child{border-bottom:none}
+    .step.done{background:#f0fdf4;color:var(--text)}
+    .step.run{background:var(--primary-light);color:var(--primary)}
+    .step.pend{color:var(--faint)}
+    .sico{width:36px;height:36px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .step.done .sico{background:var(--success);color:#fff}
+    .step.run .sico{background:var(--primary);color:#fff;animation:spin 1.2s linear infinite}
+    .step.pend .sico{background:#d1cfe8;color:#fff}
+    .res-wrap{padding:2rem 1rem}
+    .res-inner{max-width:1000px;margin:0 auto}
+    .banner{background:var(--primary);border-radius:var(--r-xl);padding:2rem 2.5rem;display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;margin-bottom:1.5rem;flex-wrap:wrap}
+    .b-complete{display:flex;align-items:center;gap:.75rem;color:rgba(255,255,255,.9);font-size:var(--sm);font-weight:600;margin-bottom:.5rem}
+    .b-done-ico{width:22px;height:22px;border:2.5px solid #22c55e;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center}
+    .b-conf{font-size:clamp(2.5rem,6vw,4rem);font-weight:800;color:#fff;line-height:1;display:flex;align-items:baseline;gap:.375rem}
+    .b-pct{font-size:.45em;font-weight:600;color:rgba(255,255,255,.8)}
+    .b-lbl{font-size:var(--base);color:rgba(255,255,255,.7);font-weight:400;margin-left:.25rem}
+    .b-stats{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;align-self:center}
+    .bstat{background:rgba(255,255,255,.15);border-radius:var(--r-lg);padding:.75rem 1rem;min-width:110px}
+    .bstat-k{font-size:var(--xs);color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:2px}
+    .bstat-v{font-size:var(--base);font-weight:700;color:#fff}
+    .res-actions{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+    .btn-pri{background:var(--primary);color:#fff;font-weight:600;font-size:var(--sm);padding:1rem 1.5rem;border-radius:var(--r-full);transition:background var(--tr),transform var(--tr);text-align:center;border:none;width:100%}
+    .btn-pri:hover{background:var(--primary-hover);transform:translateY(-1px)}
+    .btn-out{background:var(--surface);color:var(--text);font-weight:600;font-size:var(--sm);padding:1rem 1.5rem;border-radius:var(--r-full);border:1px solid var(--border);transition:border-color var(--tr),background var(--tr);display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%}
+    .btn-out:hover{border-color:var(--primary);background:var(--primary-light)}
+    .rgrid{display:grid;grid-template-columns:1fr 360px;gap:1.5rem}
+    .tcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--sh-sm)}
+    .thdr{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+    .thdr h3{font-size:var(--base);font-weight:700}
+    .btn-copy{display:flex;align-items:center;gap:.5rem;font-size:var(--xs);font-weight:600;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:var(--r-md);padding:.375rem .75rem;transition:color var(--tr),border-color var(--tr)}
+    .btn-copy:hover{color:var(--primary);border-color:var(--primary)}
+    .btn-copy svg{width:13px;height:13px;flex-shrink:0}
+    .trow{display:flex;align-items:center;padding:.75rem 1.5rem;gap:1rem;transition:background var(--tr)}
+    .trow:hover{background:var(--bg)}
+    .tts{font-size:var(--xs);color:var(--muted);font-weight:600;min-width:28px}
+    .ttxt{flex:1;font-size:var(--sm);color:var(--text)}
+    .tcnf{font-size:var(--xs);font-weight:600;color:var(--muted);min-width:30px;text-align:right}
+    .tdiv{height:1px;background:var(--divider);margin:0 1.5rem}
+    .vcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--sh-sm)}
+    .vhdr{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+    .vhdr h3{font-size:var(--base);font-weight:700}
+    .vthumb{background:#0d0b1a;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
+    .vplay{width:52px;height:52px;background:rgba(255,255,255,.15);border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;transition:background var(--tr)}
+    .vplay:hover{background:rgba(255,255,255,.28)}
+    .vplay svg{color:#fff;width:20px;height:20px;margin-left:3px}
+    .vmeta{padding:1rem 1.5rem;border-bottom:1px solid var(--border)}
+    .vctrl{display:flex;align-items:center;gap:.75rem;margin-top:.75rem}
+    .vctrl svg{width:16px;height:16px;color:var(--muted);cursor:pointer;flex-shrink:0}
+    .vctrl svg:hover{color:var(--primary)}
+    .vname{padding:1rem 1.5rem}
+    .vfile{font-size:var(--sm);font-weight:600;margin-bottom:2px}
+    .vfmeta{font-size:var(--xs);color:var(--muted)}
+    .error-toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:.75rem 1.5rem;border-radius:var(--r-full);font-weight:600;font-size:var(--sm);z-index:999;display:none}
+    @media(max-width:768px){
+      .rgrid{grid-template-columns:1fr}
+      .res-actions{grid-template-columns:1fr}
+      .banner{flex-direction:column}
+      .b-stats{width:100%}
+      .nav{padding:.75rem 1rem}
+    }
+  </style>
+</head>
+<body>
+
+<div class="error-toast" id="errToast"></div>
+
+<nav class="nav">
+  <a href="#" class="logo" onclick="showPage('upload');return false;">
+  <img src="lipstream-logo.png" alt="LipStream" style="height:36px;width:auto;"/>
+  </a>
+  <div class="nav-steps">
+    <button class="nav-btn active" id="nav-upload" onclick="showPage('upload')">Upload</button>
+    <button class="nav-btn" id="nav-processing" onclick="showPage('processing')">Processing</button>
+    <button class="nav-btn" id="nav-results" onclick="showPage('results')">Results</button>
+  </div>
+</nav>
+
+<!-- UPLOAD -->
+<div class="page active" id="page-upload">
+  <div class="upload-wrap">
+    <div class="upload-h">
+  <img src="lipstream-logo.png" alt="LipStream" style="height:60px;width:auto;"/>
+</div>
+    <p class="upload-sub">Convert silent video into accurate text transcripts</p>
+    <div class="dropzone" id="dz" onclick="document.getElementById('fi').click()">
+      <div class="dz-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <path d="M8 21h8M12 17v4"/>
+          <polygon points="10,8 16,11 10,14" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <div class="dz-label">Drop video here or <span>browse files</span></div>
+      <div class="dz-meta">MP4, AVI, MOV &nbsp;&bull;&nbsp; 2–10 seconds &nbsp;&bull;&nbsp; English only</div>
+    </div>
+    <input type="file" id="fi" accept="video/*"/>
+  </div>
+</div>
+
+<!-- PROCESSING -->
+<div class="page" id="page-processing">
+  <div class="proc-wrap">
+    <div class="spin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+      </svg>
+    </div>
+    <h1 class="proc-title">Analyzing video</h1>
+    <p class="proc-sub">Matching lip patterns to speech</p>
+    <div class="pcard">
+      <div class="phdr"><span class="plbl">Processing</span><span class="ppct" id="pct">0%</span></div>
+      <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
+      <div class="pftr">
+        <span id="trem">Calculating…</span>
+        <div class="ptimer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="tval">0:00</span>
+        </div>
+      </div>
+    </div>
+    <div class="scard">
+      <div class="step pend" id="s1">
+        <div class="sico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        Extract frames
+      </div>
+      <div class="step pend" id="s2">
+        <div class="sico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+        Analyze patterns
+      </div>
+      <div class="step pend" id="s3">
+        <div class="sico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        Generate text
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="page res-wrap" id="page-results">
+  <div class="res-inner">
+    <div class="banner">
+      <div>
+        <div class="b-complete">
+          <div class="b-done-ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Transcript complete
+        </div>
+        <div class="b-conf"><span id="confVal">—</span><span class="b-pct">%</span><span class="b-lbl">confidence</span></div>
+      </div>
+      <div class="b-stats">
+        <div class="bstat"><div class="bstat-k">Sentences</div><div class="bstat-v" id="statSentences">—</div></div>
+        <div class="bstat"><div class="bstat-k">Duration</div><div class="bstat-v" id="statDuration">—</div></div>
+        <div class="bstat"><div class="bstat-k">Language</div><div class="bstat-v">English</div></div>
+        <div class="bstat"><div class="bstat-k">Quality</div><div class="bstat-v" id="statQuality">—</div></div>
+      </div>
+    </div>
+    <div class="res-actions">
+      <button class="btn-pri" onclick="resetUpload()">Analyze another video</button>
+      <button class="btn-out" onclick="exportTranscript()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export transcript
+      </button>
+    </div>
+    <div class="rgrid">
+      <div class="tcard">
+        <div class="thdr">
+          <h3>Full transcript</h3>
+          <button class="btn-copy" id="cpbtn" onclick="copyAll()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy all
+          </button>
+        </div>
+        <div id="tlist"></div>
+      </div>
+      <div class="vcard">
+        <div class="vhdr"><h3>Source video</h3></div>
+        <div class="vthumb" id="vthumb">
+          <button class="vplay" aria-label="Play video"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+        </div>
+        <div class="vname">
+          <div class="vfile" id="vfilename">—</div>
+          <div class="vfmeta" id="vfilemeta">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── config ────────────────────────────────────────────────────────────────────
+const API_BASE = "http://localhost:5001";
+
+// ── state ─────────────────────────────────────────────────────────────────────
+let currentFile = null;
+let transcriptData = [];
+
+// ── page navigation ───────────────────────────────────────────────────────────
+function showPage(n) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("page-" + n).classList.add("active");
+  document.getElementById("nav-" + n).classList.add("active");
+}
+
+// ── error toast ───────────────────────────────────────────────────────────────
+function showError(msg) {
+  const t = document.getElementById("errToast");
+  t.textContent = msg;
+  t.style.display = "block";
+  setTimeout(() => { t.style.display = "none"; }, 4000);
+}
+
+// ── upload trigger ────────────────────────────────────────────────────────────
+const dz = document.getElementById("dz");
+dz.addEventListener("dragover",  e => { e.preventDefault(); dz.classList.add("over"); });
+dz.addEventListener("dragleave", () => dz.classList.remove("over"));
+dz.addEventListener("drop", e => {
+  e.preventDefault();
+  dz.classList.remove("over");
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+document.getElementById("fi").addEventListener("change", e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+  currentFile = file;
+  showPage("processing");
+  startFakeProgress();
+  sendVideoToBackend(file);
+}
+
+// ── fake progress animation (runs while awaiting API) ─────────────────────────
+let pI = null;
+let progressFrozen = false;
+
+function startFakeProgress() {
+  clearInterval(pI);
+  progressFrozen = false;
+  let p = 0, e = 0;
+  const fill = document.getElementById("pfill"),
+        pl   = document.getElementById("pct"),
+        tr   = document.getElementById("trem"),
+        tv   = document.getElementById("tval");
+  ["s1","s2","s3"].forEach(id => document.getElementById(id).className = "step pend");
+  const steps = [{id:"s1",s:0,e:33},{id:"s2",s:33,e:70},{id:"s3",s:70,e:100}];
+  const ft = s => Math.floor(s/60) + ":" + String(s%60).padStart(2,"0");
+
+  pI = setInterval(() => {
+    if (progressFrozen) return;
+    // freeze at 90% until API responds
+    if (p >= 90) return;
+    p = Math.min(p + 1, 90);
+    e++;
+    fill.style.width = p + "%";
+    pl.textContent = p + "%";
+    const r = Math.max(0, Math.round((100 - p) * .1));
+    tr.textContent = r > 0 ? "About " + r + " second" + (r !== 1 ? "s" : "") + " remaining" : "Almost done…";
+    tv.textContent = ft(e);
+    steps.forEach(st => {
+      const el = document.getElementById(st.id);
+      if (p >= st.e) el.className = "step done";
+      else if (p >= st.s) el.className = "step run";
+      else el.className = "step pend";
+    });
+  }, 100);
+}
+
+function completeProgress() {
+  clearInterval(pI);
+  const fill = document.getElementById("pfill"),
+        pl   = document.getElementById("pct"),
+        tr   = document.getElementById("trem");
+  fill.style.width = "100%";
+  pl.textContent = "100%";
+  tr.textContent = "Complete!";
+  ["s1","s2","s3"].forEach(id => document.getElementById(id).className = "step done");
+  setTimeout(() => showPage("results"), 600);
+}
+
+// ── API call ──────────────────────────────────────────────────────────────────
+async function sendVideoToBackend(file) {
+  const formData = new FormData();
+  formData.append("video", file);
+
+  try {
+    const response = await fetch(`${API_BASE}/predict`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${response.status}`);
+    }
+
+    const data = await response.json();
+    renderResults(data, file);
+    completeProgress();
+
+  } catch (err) {
+    clearInterval(pI);
+    showPage("upload");
+    showError("Error: " + err.message);
+  }
+}
+
+// ── render results ────────────────────────────────────────────────────────────
+function renderResults(data, file) {
+  // banner
+  document.getElementById("confVal").textContent     = (data.confidence * 100).toFixed(1);
+  document.getElementById("statSentences").textContent = data.sentences;
+  document.getElementById("statDuration").textContent  = data.duration + "s";
+  document.getElementById("statQuality").textContent   = data.quality;
+
+  // transcript list
+// بناء transcriptData من timed_words
+transcriptData = data.timed_words.map(item => {
+  const sec = item.time;
+  const ts  = Math.floor(sec / 60) + ":" + String(Math.floor(sec % 60)).padStart(2, "0");
+  return { ts, text: item.word };
+});
+
+const list = document.getElementById("tlist");
+list.innerHTML = "";
+transcriptData.forEach((r, i) => {
+  list.innerHTML += `<div class="trow">
+    <span class="tts">${r.ts}</span>
+    <span class="ttxt">${r.text}</span>
+  </div>${i < transcriptData.length - 1 ? '<div class="tdiv"></div>' : ''}`;
+});
+
+
+  // video meta
+  document.getElementById("vfilename").textContent = file.name;
+  document.getElementById("vfilemeta").textContent =
+    file.name.split(".").pop().toUpperCase() + " · " + data.duration + "s";
+
+  // تشغيل الفيديو
+  const thumb = document.getElementById("vthumb");
+  thumb.innerHTML = `<video controls style="width:100%;height:100%;object-fit:cover;"
+    src="data:video/mp4;base64,${data.video_b64}"></video>`;
+}
+
+// ── copy all ──────────────────────────────────────────────────────────────────
+function copyAll() {
+  const text = transcriptData.map(r => r.text).join("\n");
+  navigator.clipboard.writeText(text).catch(() => {});
+  const b = document.getElementById("cpbtn");
+  b.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+  b.style.color = "var(--primary)";
+  setTimeout(() => {
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy all';
+    b.style.color = "";
+  }, 2000);
+}
+
+// ── export transcript ─────────────────────────────────────────────────────────
+function exportTranscript() {
+  const text = transcriptData.map(r => `[${r.ts}] ${r.text}`).join("\n");
+  const blob = new Blob([text], { type: "text/plain" });
+  const a    = document.createElement("a");
+  a.href     = URL.createObjectURL(blob);
+  a.download = "transcript.txt";
+  a.click();
+}
+
+// ── reset ─────────────────────────────────────────────────────────────────────
+function resetUpload() {
+  currentFile = null;
+  document.getElementById("fi").value = "";
+  showPage("upload");
+}
+</script>
+</body>
+</html>
